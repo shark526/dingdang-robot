@@ -4,6 +4,7 @@ import logging
 from .notifier import Notifier
 from .brain import Brain
 import time
+from .drivers.pixels import pixels
 
 
 class Conversation(object):
@@ -76,13 +77,15 @@ class Conversation(object):
                 self._logger.debug("Skip passive listening")
                 if not self.mic.chatting_mode:
                     self.mic.skip_passive = False
-
+            pixels.wakeup()
             self._logger.debug("Started to listen actively with threshold: %r",
                                threshold)
             input = self.mic.activeListenToAllOptions(threshold)
             self._logger.debug("Stopped to listen actively with threshold: %r",
                                threshold)
+            pixels.think()
             if input:
                 self.brain.query(input, self.wxbot)
             else:
                 self.mic.say("什么?")
+            pixels.off()
