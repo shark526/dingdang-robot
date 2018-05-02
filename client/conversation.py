@@ -4,7 +4,7 @@ import logging
 from .notifier import Notifier
 from .brain import Brain
 import time
-from .drivers.pixels import pixels
+from .drivers.pixels import Pixels
 
 
 class Conversation(object):
@@ -17,6 +17,14 @@ class Conversation(object):
         self.brain = Brain(mic, profile)
         self.notifier = Notifier(profile, self.brain)
         self.wxbot = None
+        self.pixels = None
+        SLUG = "signal_led"
+        if profile[SLUG] and 'enable' in profile[SLUG] and \
+            profile[SLUG]['enable'] and \
+            'gpio_mode' in profile[SLUG] and \
+                'pin' in profile[SLUG]:
+            self.pixels = Pixels(profile[SLUG]['gpio_mode'],
+                                 profile[SLUG]['pin'])
 
     def is_proper_time(self):
         """
@@ -77,15 +85,18 @@ class Conversation(object):
                 self._logger.debug("Skip passive listening")
                 if not self.mic.chatting_mode:
                     self.mic.skip_passive = False
-            pixels.wakeup()
+            if self.pixels:
+                self.pixels.wakeup()
             self._logger.debug("Started to listen actively with threshold: %r",
                                threshold)
             input = self.mic.activeListenToAllOptions(threshold)
             self._logger.debug("Stopped to listen actively with threshold: %r",
                                threshold)
-            pixels.think()
+            if self.pixels:
+                self.pixels.think()
             if input:
                 self.brain.query(input, self.wxbot)
             else:
                 self.mic.say("什么?")
-            pixels.off()
+            if self.pixels:
+                self.pixels.off()
