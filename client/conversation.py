@@ -18,8 +18,8 @@ class Conversation(object):
         self.notifier = Notifier(profile, self.brain)
         self.wxbot = None
         self.pixels = None
-        SLUG = "signal_led"
-        if profile[SLUG] and 'enable' in profile[SLUG] and \
+        SLUG = 'signal_led'
+        if SLUG in profile and 'enable' in profile[SLUG] and \
             profile[SLUG]['enable'] and \
             'gpio_mode' in profile[SLUG] and \
                 'pin' in profile[SLUG]:
